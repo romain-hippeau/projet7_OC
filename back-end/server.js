@@ -1,23 +1,48 @@
-const express = require("express");
-const app = express();
+const http = require('http');
+const app = require('./app');
+// ajout de normalizePort renvoie un port valide
+const normalizePort = val => {
+    const port = parseInt(val, 10);
 
-/*var corsOptions = {
-  origin: "http://localhost:8080"
-};*/
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  next();
+    if (isNaN(port)) {
+        return val;
+    }
+    if (port >= 0) {
+        return port;
+    }
+    return false;
+};
+// ajout du port sur lequel l'application vas tourner
+const port = normalizePort(process.env.PORT ||  '8081');
+app.set('port', port);
+// ajout de errorHandler qui recherche les différentes erreurs et les gère de manière appropriée et Elle est ensuite enregistrée dans le serveur 
+const errorHandler = error => {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+    const address = server.address();
+    const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges.');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use.');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+};
+//ajout de l'application dans notre logique server
+const server = http.createServer(app);
+// ajout de l'écoute du port
+server.on('error', errorHandler);
+server.on('listening', () => {
+    const address = server.address();
+    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+    console.log('Connexion au ' + bind);
 });
 
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome " });
-});
-
-// set port, listen for requests
-const PORT = process.env.PORT || 8081;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-});
+server.listen(port);
