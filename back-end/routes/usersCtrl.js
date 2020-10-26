@@ -1,7 +1,9 @@
 //imports
+const express = require ('express');
 const bcrypt = require('bcrypt');
 const jwtUtils = require('../utils/jwt.utils');
-const models = require('../models');
+const asyncLib = require('async');
+const { models } = require('../database');
 //email regex
 
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -82,5 +84,35 @@ module.exports = {
                 }).catch(function(err){
                  return res.status(500).json({ 'error': 'unable to verify user'})
              })
+    },
+    getUserProfile: function (req, res) {
+        // fonction pour recuperer le profile et le modifier
+        // recuperation de l'entete authorization
+        var headerAuth = req.headerAuth['authorization'];
+        var userId     = jwtUtils.getUserId(headerAuth);
+
+        if(userId < 0)
+        return res.status(400).json ({'error': 'wrong token'});
+        models.User.findOne({
+            attributes: ['id', 'email' , 'username', 'bio'],
+            where: {id: userId}
+        }).then(function(user){
+            if (user) {
+                res.status(201).json(user);
+            } else {
+                res.status(404).json({
+                    'error': 'user not found'
+                });
+            }
+        }).catch(function(err){
+            res.status(500).json({ 'error': 'cannot fetch user'});
+        })
+    },
+    updateUserProfile: function(req,res){
+        var headerAuth = req.headers['authorization'];
+        var userId     = jwtUtils.getUserId(headerAuth);
+
+        var bio = req.body.bio;
+        //mise en place de la fonction pour mettre a jour le profile utilisateur
     }
 }

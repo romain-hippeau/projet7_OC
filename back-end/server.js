@@ -1,5 +1,6 @@
 const http = require('http');
 const app = require('./app');
+const db = require('./models')
 // ajout de normalizePort renvoie un port valide
 const normalizePort = val => {
     const port = parseInt(val, 10);
@@ -13,7 +14,7 @@ const normalizePort = val => {
     return false;
 };
 // ajout du port sur lequel l'application vas tourner
-const port = normalizePort(process.env.PORT ||  '8081');
+const port = normalizePort(process.env.PORT ||  '3000');
 app.set('port', port);
 // ajout de errorHandler qui recherche les différentes erreurs et les gère de manière appropriée et Elle est ensuite enregistrée dans le serveur 
 const errorHandler = error => {
